@@ -1,71 +1,188 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
     <title>Проект "Комменты"</title>
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-
-  <body>
-    <div class="container">
-      <ul class="comments">
+    <meta charset="utf-8"/>
+    <link rel="stylesheet" href="styles.css"/>
+</head>
+<style>
+    .error {
+        border: 1px solid red;
+    }
+</style>
+<body>
+<div class="container">
+    <ul class="comments">
         <li class="comment">
-          <div class="comment-header">
-            <div>Глеб Фокин</div>
-            <div>12.02.22 12:18</div>
-          </div>
-          <div class="comment-body">
-            <div class="comment-text">
-              Это будет первый комментарий на этой странице
+            <div class="comment-header">
+                <div>Глеб Фокин</div>
+                <div>12.02.22 12:18</div>
             </div>
-          </div>
-          <div class="comment-footer">
-            <div class="likes">
-              <span class="likes-counter">3</span>
-              <button class="like-button"></button>
+            <div class="comment-body">
+                <div class="comment-text">
+                    Это будет первый комментарий на этой странице
+                </div>
             </div>
-          </div>
+            <div class="comment-footer">
+                <div class="likes">
+                    <span class="likes-counter">3</span>
+                    <button class="like-button"></button>
+                </div>
+            </div>
         </li>
         <li class="comment">
-          <div class="comment-header">
-            <div>Варвара Н.</div>
-            <div>13.02.22 19:22</div>
-          </div>
-          <div class="comment-body">
-            <div class="comment-text">
-              Мне нравится как оформлена эта страница! ❤
+            <div class="comment-header">
+                <div>Варвара Н.</div>
+                <div>13.02.22 19:22</div>
             </div>
-          </div>
-          <div class="comment-footer">
-            <div class="likes">
-              <span class="likes-counter">75</span>
-              <button class="like-button -active-like"></button>
+            <div class="comment-body">
+                <div class="comment-text">
+                    Мне нравится как оформлена эта страница! ❤
+                </div>
             </div>
-          </div>
+            <div class="comment-footer">
+                <div class="likes">
+                    <span class="likes-counter">75</span>
+                    <button class="like-button -active-like"></button>
+                </div>
+            </div>
         </li>
-      </ul>
-      <div class="add-form">
+    </ul>
+    <div class="add-form">
         <input
-          type="text"
-          class="add-form-name"
-          placeholder="Введите ваше имя"
+                type="text"
+                class="add-form-name"
+                placeholder="Введите ваше имя"
         />
         <textarea
-          type="textarea"
-          class="add-form-text"
-          placeholder="Введите ваш коментарий"
-          rows="4"
+                type="textarea"
+                class="add-form-text"
+                placeholder="Введите ваш коментарий"
+                rows="4"
         ></textarea>
         <div class="add-form-row">
-          <button class="add-form-button">Написать</button>
+            <button type="button" class="add-form-button">Написать</button>
         </div>
-      </div>
     </div>
-  </body>
+</div>
+</body>
 
-  <script>
+<script>
     "use strict";
-    // Код писать здесь
+    const commentsList = document.querySelector('.comments');
+
+    function formatDate(date) {
+        const d = date;
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = String(d.getFullYear()).slice(2);
+        const hours = String(d.getHours()).padStart(2, '0');
+        const minutes = String(d.getMinutes()).padStart(2, '0');
+        return `${day}.${month}.${year} ${hours}:${minutes}`;
+    }
+
+    const button = document.querySelector('.add-form-button');
+    const input = document.querySelector('.add-form-name');
+    const textarea = document.querySelector('.add-form-text');
+
+    button.addEventListener('click', () => {
+        input.classList.remove("error");
+        textarea.classList.remove("error");
+
+
+        const name = input.value;
+        const text = textarea.value;
+
+        if (!name || !text) {
+            alert("Заполни все поля")
+            input.classList.add("error");
+            textarea.classList.add("error");
+            return;
+        }
+
+
+        // const comment = createComment(name, text);
+        // document.querySelector('.comments').appendChild(comment);
+        //
+        // input.value = '';
+        // textarea.value = '';
+        // })
+        //
+        // function createComment(name, text) {
+        //   const commentEl = document.createElement('li');
+        //   commentEl.classList.add('comment');
+        //
+        //   const headerEl = document.createElement('div');
+        //   headerEl.classList.add('comment-header');
+        //
+        //   const nameEl = document.createElement('div');
+        //   nameEl.textContent = name;
+        //
+        //   const dateEl = document.createElement('div');
+        //   dateEl.textContent = formatDate(new Date());
+        //
+        //   headerEl.appendChild(nameEl);
+        //   headerEl.appendChild(dateEl);
+        //
+        //   const bodyEl = document.createElement('div');
+        //   bodyEl.classList.add('comment-body');
+        //
+        //   const textEl = document.createElement('div');
+        //   textEl.classList.add('comment-text');
+        //   textEl.textContent = text;
+        //
+        //   bodyEl.appendChild(textEl);
+        //
+        //   const footerEl = document.createElement('div');
+        //   footerEl.classList.add('comment-footer');
+        //
+        //   const likesEl = document.createElement('div');
+        //   likesEl.classList.add('likes');
+        //
+        //   const counterEl = document.createElement('span');
+        //   counterEl.classList.add('likes-counter');
+        //   counterEl.textContent = '0';
+        //
+        //   const likeBtn = document.createElement('button');
+        //   likeBtn.classList.add('like-button');
+        //
+        //   likesEl.appendChild(counterEl);
+        //   likesEl.appendChild(likeBtn);
+        //   footerEl.appendChild(likesEl);
+        //
+        //   commentEl.appendChild(headerEl);
+        //   commentEl.appendChild(bodyEl);
+        //   commentEl.appendChild(footerEl);
+        //
+        //   return commentEl;
+        // }
+
+        const commentHtml = `
+      <li class="comment">
+        <div class="comment-header">
+          <div>${name}</div>
+          <div>${formatDate(new Date())}</div>
+        </div>
+        <div class="comment-body">
+          <div class="comment-text">
+            ${text}
+          </div>
+        </div>
+        <div class="comment-footer">
+          <div class="likes">
+            <span class="likes-counter">0</span>
+            <button class="like-button"></button>
+          </div>
+        </div>
+      </li>
+    `;
+
+        commentsList.innerHTML += commentHtml;
+
+        input.value = '';
+        textarea.value = '';
+    });
+
     console.log("It works!");
-  </script>
+</script>
 </html>
