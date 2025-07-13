@@ -9,18 +9,26 @@
     .error {
         border: 1px solid red;
     }
+
+    .comment-quote {
+        color: #888;
+        font-style: italic;
+        margin-bottom: 6px;
+        padding: 4px 8px;
+        border-left: 3px solid #bbb;
+        border-radius: 3px;
+        display: inline-block;
+    }
+
 </style>
 <body>
 <div class="container">
     <ul class="comments">
         <li class="comment">
             <div class="comment-header">
-<!--                <div>Глеб Фокин</div>-->
-<!--                <div>12.02.22 12:18</div>-->
             </div>
             <div class="comment-body">
                 <div class="comment-text">
-<!--                    Это будет первый комментарий на этой странице-->
                 </div>
             </div>
             <div class="comment-footer">
@@ -32,12 +40,9 @@
         </li>
         <li class="comment">
             <div class="comment-header">
-<!--                <div>Варвара Н.</div>-->
-<!--                <div>13.02.22 19:22</div>-->
             </div>
             <div class="comment-body">
                 <div class="comment-text">
-<!--                    Мне нравится как оформлена эта страница! ❤-->
                 </div>
             </div>
             <div class="comment-footer">
@@ -70,6 +75,15 @@
 <script>
     "use strict";
 
+    function escapeHTML(str) {
+        return str
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#39;");
+    }
+
     const commentsList = document.querySelector('.comments');
     const button = document.querySelector('.add-form-button');
     const input = document.querySelector('.add-form-name');
@@ -80,6 +94,8 @@
             name: "Глеб Фокин",
             date: "12.02.22 12:18",
             text: "Это будет первый комментарий на этой странице",
+            quote: "",
+            quoteAuthor: "",
             likesCount: 3,
             isLiked: false,
         },
@@ -87,10 +103,13 @@
             name: "Варвара Н.",
             date: "13.02.22 19:22",
             text: "Мне нравится как оформлена эта страница! ❤",
+            quote: "",
+            quoteAuthor: "",
             likesCount: 75,
             isLiked: true,
         },
     ];
+
 
     function formatDate(date) {
         const day = String(date.getDate()).padStart(2, '0');
@@ -105,27 +124,47 @@
         commentsList.innerHTML = "";
         comments.forEach((comment, index) => {
             const commentHtml = `
-        <li class="comment">
-          <div class="comment-header">
-            <div>${comment.name}</div>
-            <div>${comment.date}</div>
+      <li class="comment" data-index="${index}">
+        <div class="comment-header">
+          <div>${escapeHTML(comment.name)}</div>
+          <div>${escapeHTML(comment.date)}</div>
+        </div>
+        <div class="comment-body">
+    ${comment.quote
+                ? `<div class="comment-quote">"${escapeHTML(comment.quote)}" <span class="comment-quote-author">(${escapeHTML(comment.quoteAuthor)})</span></div>`
+                : ''}
+    <div class="comment-text">${escapeHTML(comment.text)}</div>
+</div>
+
+        <div class="comment-footer">
+          <div class="likes">
+            <span class="likes-counter">${comment.likesCount}</span>
+            <button class="like-button ${comment.isLiked ? '-active-like' : ''}" data-index="${index}"></button>
           </div>
-          <div class="comment-body">
-            <div class="comment-text">${comment.text}</div>
-          </div>
-          <div class="comment-footer">
-            <div class="likes">
-              <span class="likes-counter">${comment.likesCount}</span>
-              <button class="like-button ${comment.isLiked ? '-active-like' : ''}" data-index="${index}"></button>
-            </div>
-          </div>
-        </li>
-      `;
+        </div>
+      </li>
+    `;
             commentsList.innerHTML += commentHtml;
         });
-
         attachLikeListeners();
+        attachCommentReply();
     }
+
+    function attachCommentReply() {
+        document.querySelectorAll(".comment").forEach((li) => {
+            li.onclick = function(e) {
+                if (e.target.classList.contains('like-button')) return;
+                const idx = li.getAttribute("data-index");
+                const c = comments[idx];
+                textarea.value = "";
+                textarea.dataset.quote = c.text;
+                textarea.dataset.quoteAuthor = c.name;
+                showQuoteBlock(c.text, c.name);
+                textarea.focus();
+            };
+        });
+    }
+
 
     function attachLikeListeners() {
         const likeButtons = document.querySelectorAll(".like-button");
@@ -142,12 +181,34 @@
         });
     }
 
+    function showQuoteBlock(quoteText, quoteAuthor) {
+        let oldQuote = document.querySelector('.js-quote-block');
+        if (oldQuote) oldQuote.remove();
+
+        const div = document.createElement('div');
+        div.className = 'js-quote-block';
+        div.style = 'margin:8px 0;padding:6px 10px;border-left:3px solid #bbb;background:#f8f8f8;color:#555;font-style:italic;display:flex;align-items:center;';
+        div.innerHTML = `"${escapeHTML(quoteText)}" <b>(${escapeHTML(quoteAuthor)})</b>
+      <button style="margin-left:auto;background:none;border:none;font-size:18px;cursor:pointer;color:#888;" title="Убрать цитату">&times;</button>`;
+
+        div.querySelector('button').onclick = function() {
+            div.remove();
+            textarea.dataset.quote = '';
+            textarea.dataset.quoteAuthor = '';
+        };
+
+        textarea.parentNode.insertBefore(div, textarea);
+    }
+
+
     button.addEventListener("click", () => {
         input.classList.remove("error");
         textarea.classList.remove("error");
 
         const name = input.value.trim();
         const text = textarea.value.trim();
+        const quote = textarea.dataset.quote || "";
+        const quoteAuthor = textarea.dataset.quoteAuthor || "";
 
         if (!name || !text) {
             alert("Заполни все поля");
@@ -160,12 +221,19 @@
             name: name,
             date: formatDate(new Date()),
             text: text,
+            quote: quote,
+            quoteAuthor: quoteAuthor,
             likesCount: 0,
             isLiked: false,
         });
 
+        let oldQuote = document.querySelector('.js-quote-block');
+        if (oldQuote) oldQuote.remove();
+
         input.value = "";
         textarea.value = "";
+        textarea.quote = "";
+        textarea.quoteAuthor = "";
 
         renderComments();
     });
