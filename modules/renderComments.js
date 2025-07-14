@@ -1,8 +1,14 @@
-import {escapeHTML} from "./escapeHTML.js";
-import {comments} from "./commentsData.js";
+import { escapeHTML } from './escapeHTML.js'
+import { comments } from './commentsData.js'
 
-export function renderComments({commentsList, textarea, showQuoteBlock, attachLikeListeners, attachCommentReply}) {
-    commentsList.innerHTML = "";
+export function renderComments({
+    commentsList,
+    textarea,
+    showQuoteBlock,
+    attachLikeListeners,
+    attachCommentReply,
+}) {
+    commentsList.innerHTML = ''
     comments.forEach((comment, index) => {
         const commentHtml = `
       <li class="comment" data-index="${index}">
@@ -11,9 +17,11 @@ export function renderComments({commentsList, textarea, showQuoteBlock, attachLi
           <div>${escapeHTML(comment.date)}</div>
         </div>
         <div class="comment-body">
-    ${comment.quote
+    ${
+        comment.quote
             ? `<div class="comment-quote">"${escapeHTML(comment.quote)}" <span class="comment-quote-author">(${escapeHTML(comment.quoteAuthor)})</span></div>`
-            : ''}
+            : ''
+    }
     <div class="comment-text">${escapeHTML(comment.text)}</div>
 </div>
 
@@ -24,9 +32,9 @@ export function renderComments({commentsList, textarea, showQuoteBlock, attachLi
           </div>
         </div>
       </li>
-    `;
-        commentsList.innerHTML += commentHtml;
-    });
-    attachLikeListeners();
-    attachCommentReply();
+    `
+        commentsList.innerHTML += commentHtml
+    })
+    attachLikeListeners()
+    attachCommentReply()
 }
