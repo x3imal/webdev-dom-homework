@@ -1,5 +1,5 @@
 import { escapeHTML } from './escapeHTML.js'
-import { comments } from './commentsData.js'
+import {comments} from "../index.js";
 
 export function renderComments({
     commentsList,

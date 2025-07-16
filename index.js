@@ -1,4 +1,3 @@
-import { comments } from './modules/commentsData.js'
 import { formatDate } from './modules/formatDate.js'
 import { showQuoteBlock } from './modules/showQuoteBlock.js'
 import { renderComments } from './modules/renderComments.js'
@@ -9,6 +8,9 @@ const commentsList = document.querySelector('.comments')
 const button = document.querySelector('.add-form-button')
 const input = document.querySelector('.add-form-name')
 const textarea = document.querySelector('.add-form-text')
+
+export let comments = [];
+
 
 function renderAll() {
     renderComments({

@@ -1,4 +1,4 @@
-import { comments } from './commentsData.js'
+import {comments} from "../index.js";
 
 export function attachCommentReply({ textarea, showQuoteBlock }) {
     document.querySelectorAll('.comment').forEach((li) => {

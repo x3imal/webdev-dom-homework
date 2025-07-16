@@ -1,4 +1,4 @@
-import { comments } from './commentsData.js'
+import { comments} from "../index.js";
 import { renderComments } from './renderComments.js'
 
 export function attachLikeListeners({
