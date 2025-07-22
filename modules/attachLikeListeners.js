@@ -1,29 +1,41 @@
-import { comments} from "../index.js";
 import { renderComments } from './renderComments.js'
 
 export function attachLikeListeners({
-    commentsList,
-    textarea,
-    showQuoteBlock,
-    attachLikeListeners,
-    attachCommentReply,
-}) {
-    const likeButtons = document.querySelectorAll('.like-button')
+                                        commentsList,
+                                        textarea,
+                                        showQuoteBlock,
+                                        attachLikeListeners,
+                                        attachCommentReply,
+                                        comments,
+                                    }) {
+    const likeButtons = document.querySelectorAll('.like-button');
+
     likeButtons.forEach((button) => {
         button.onclick = () => {
-            const index = button.dataset.index
-            const comment = comments[index]
+            const index = button.dataset.index;
+            const comment = comments[index];
 
-            comment.isLiked = !comment.isLiked
-            comment.likesCount += comment.isLiked ? 1 : -1
+            comment.isLiked = !comment.isLiked;
+            comment.likesCount += comment.isLiked ? 1 : -1;
 
+            // перерисовка
             renderComments({
                 commentsList,
                 textarea,
                 showQuoteBlock,
-                attachLikeListeners,
-                attachCommentReply,
-            })
-        }
-    })
+                attachLikeListeners: () =>
+                    attachLikeListeners({
+                        commentsList,
+                        textarea,
+                        showQuoteBlock,
+                        attachLikeListeners,
+                        attachCommentReply,
+                        comments,
+                    }),
+                attachCommentReply: () =>
+                    attachCommentReply({ textarea, showQuoteBlock }),
+                comments,
+            });
+        };
+    });
 }

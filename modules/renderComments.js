@@ -1,30 +1,28 @@
 import { escapeHTML } from './escapeHTML.js'
-import {comments} from "../index.js";
 
 export function renderComments({
-    commentsList,
-    textarea,
-    showQuoteBlock,
-    attachLikeListeners,
-    attachCommentReply,
-}) {
-    commentsList.innerHTML = ''
+                                   commentsList,
+                                   textarea,
+                                   showQuoteBlock,
+                                   attachLikeListeners,
+                                   attachCommentReply,
+                                   comments,
+                               }) {
+    commentsList.innerHTML = '';
     comments.forEach((comment, index) => {
         const commentHtml = `
       <li class="comment" data-index="${index}">
         <div class="comment-header">
-          <div>${escapeHTML(comment.name)}</div>
-          <div>${escapeHTML(comment.date)}</div>
+          <div>${escapeHTML(comment.author.name)}</div>
+          <div>${escapeHTML(new Date(comment.date).toLocaleString())}</div>
         </div>
         <div class="comment-body">
-    ${
-        comment.quote
-            ? `<div class="comment-quote">"${escapeHTML(comment.quote)}" <span class="comment-quote-author">(${escapeHTML(comment.quoteAuthor)})</span></div>`
-            : ''
-    }
-    <div class="comment-text">${escapeHTML(comment.text)}</div>
-</div>
-
+          ${comment.quote ? `
+            <div class="comment-quote">"${escapeHTML(comment.quote)}"
+            <span class="comment-quote-author">(${escapeHTML(comment.quoteAuthor)})</span></div>
+          ` : ''}
+          <div class="comment-text">${escapeHTML(comment.text)}</div>
+        </div>
         <div class="comment-footer">
           <div class="likes">
             <span class="likes-counter">${comment.likesCount}</span>
@@ -33,8 +31,8 @@ export function renderComments({
         </div>
       </li>
     `
-        commentsList.innerHTML += commentHtml
-    })
-    attachLikeListeners()
-    attachCommentReply()
+        commentsList.innerHTML += commentHtml;
+    });
+    attachLikeListeners();
+    attachCommentReply();
 }
