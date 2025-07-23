@@ -1,13 +1,10 @@
 import { getComments, postComment } from './modules/commentsApi.js'
 import { renderComments } from './modules/renderComments.js'
-import { showQuoteBlock } from './modules/showQuoteBlock.js'
-
-const commentsList = document.querySelector('.comments')
-const button = document.querySelector('.add-form-button')
-const input = document.querySelector('.add-form-name')
-const textarea = document.querySelector('.add-form-text')
 
 export let comments = []
+
+const input = document.querySelector('.add-form-name')
+const textarea = document.querySelector('.add-form-text')
 
 function loadComments() {
     return getComments().then((data) => {
@@ -24,7 +21,7 @@ function loadComments() {
     })
 }
 
-button.addEventListener('click', async () => {
+document.querySelector('.add-form-button').addEventListener('click', async () => {
     input.classList.remove('error')
     textarea.classList.remove('error')
 

@@ -1,12 +1,11 @@
-import { escapeHTML } from './escapeHTML.js'
 import { comments } from '../index.js'
-import { showQuoteBlock } from './showQuoteBlock.js'
+import { escapeHTML } from './escapeHTML.js'
+import { attachLikeListeners, attachQuoteListeners } from './attachHandlers.js'
 
 export function renderComments() {
     const commentsList = document.querySelector('.comments')
     const textarea = document.querySelector('.add-form-text')
     commentsList.innerHTML = ''
-
     comments.forEach((comment, index) => {
         const html = `
       <li class="comment" data-index="${index}">
@@ -32,25 +31,6 @@ export function renderComments() {
         commentsList.innerHTML += html
     })
 
-    document.querySelectorAll('.like-button').forEach((btn) => {
-        btn.addEventListener('click', () => {
-            const index = btn.dataset.index
-            const comment = comments[index]
-            comment.isLiked = !comment.isLiked
-            comment.likesCount += comment.isLiked ? 1 : -1
-            renderComments()
-        })
-    })
-
-    document.querySelectorAll('.comment').forEach((el) => {
-        el.addEventListener('click', (e) => {
-            if (e.target.classList.contains('like-button')) return
-            const index = el.dataset.index
-            const comment = comments[index]
-            textarea.dataset.quote = comment.text
-            textarea.dataset.quoteAuthor = comment.name
-            showQuoteBlock(comment.text, comment.name, textarea)
-            textarea.focus()
-        })
-    })
+    attachLikeListeners()
+    attachQuoteListeners()
 }
