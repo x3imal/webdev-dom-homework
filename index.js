@@ -1,34 +1,27 @@
-import { comments } from './modules/commentsData.js'
-import { formatDate } from './modules/formatDate.js'
-import { showQuoteBlock } from './modules/showQuoteBlock.js'
+import { getComments, postComment } from './modules/commentsApi.js'
 import { renderComments } from './modules/renderComments.js'
-import { attachCommentReply } from './modules/attachCommentReply.js'
-import { attachLikeListeners } from './modules/attachLikeListeners.js'
 
-const commentsList = document.querySelector('.comments')
-const button = document.querySelector('.add-form-button')
+export let comments = []
+
 const input = document.querySelector('.add-form-name')
 const textarea = document.querySelector('.add-form-text')
 
-function renderAll() {
-    renderComments({
-        commentsList,
-        textarea,
-        showQuoteBlock,
-        attachLikeListeners: () =>
-            attachLikeListeners({
-                commentsList,
-                textarea,
-                showQuoteBlock,
-                attachLikeListeners,
-                attachCommentReply,
-            }),
-        attachCommentReply: () =>
-            attachCommentReply({ textarea, showQuoteBlock }),
+function loadComments() {
+    return getComments().then((data) => {
+        comments = data.map((c) => ({
+            ...c,
+            name: c.author.name,
+            date: new Date(c.date).toLocaleString(),
+            quote: '',
+            quoteAuthor: '',
+            likesCount: c.likes ?? 0,
+            isLiked: false,
+        }))
+        renderComments()
     })
 }
 
-button.addEventListener('click', () => {
+document.querySelector('.add-form-button').addEventListener('click', async () => {
     input.classList.remove('error')
     textarea.classList.remove('error')
 
@@ -44,25 +37,30 @@ button.addEventListener('click', () => {
         return
     }
 
-    comments.push({
-        name: name,
-        date: formatDate(new Date()),
-        text: text,
-        quote: quote,
-        quoteAuthor: quoteAuthor,
-        likesCount: 0,
-        isLiked: false,
-    })
+    try {
+        await postComment({ name, text })
 
-    let oldQuote = document.querySelector('.js-quote-block')
-    if (oldQuote) oldQuote.remove()
+        comments.push({
+            name,
+            text,
+            quote,
+            quoteAuthor,
+            date: new Date().toLocaleString(),
+            likesCount: 0,
+            isLiked: false,
+        })
 
-    input.value = ''
-    textarea.value = ''
-    textarea.quote = ''
-    textarea.quoteAuthor = ''
+        input.value = ''
+        textarea.value = ''
+        textarea.dataset.quote = ''
+        textarea.dataset.quoteAuthor = ''
+        const oldQuote = document.querySelector('.js-quote-block')
+        if (oldQuote) oldQuote.remove()
 
-    renderAll()
+        renderComments()
+    } catch (e) {
+        alert('Ошибка при отправке: ' + e.message)
+    }
 })
 
-renderAll()
+loadComments()
