@@ -1,79 +1,69 @@
-import { showQuoteBlock } from './modules/showQuoteBlock.js'
+import { getComments, postComment } from './modules/commentsApi.js'
 import { renderComments } from './modules/renderComments.js'
-import { attachCommentReply } from './modules/attachCommentReply.js'
-import { attachLikeListeners } from './modules/attachLikeListeners.js'
-import { getComments, postComment} from "./modules/commentsApi.js";
+import { showQuoteBlock } from './modules/showQuoteBlock.js'
 
 const commentsList = document.querySelector('.comments')
 const button = document.querySelector('.add-form-button')
 const input = document.querySelector('.add-form-name')
 const textarea = document.querySelector('.add-form-text')
 
-export let comments = [];
+export let comments = []
 
-async function renderAll() {
-    try {
-        const rawComments = await getComments();
-
-        comments = rawComments.map((c) => ({
+function loadComments() {
+    return getComments().then((data) => {
+        comments = data.map((c) => ({
             ...c,
-            isLiked: false,
+            name: c.author.name,
+            date: new Date(c.date).toLocaleString(),
+            quote: '',
+            quoteAuthor: '',
             likesCount: c.likes ?? 0,
-        }));
-
-        renderComments({
-            commentsList,
-            textarea,
-            showQuoteBlock,
-            attachLikeListeners: () =>
-                attachLikeListeners({
-                    commentsList,
-                    textarea,
-                    showQuoteBlock,
-                    attachLikeListeners,
-                    attachCommentReply,
-                    comments,
-                }),
-            attachCommentReply: () =>
-                attachCommentReply({ textarea, showQuoteBlock }),
-            comments,
-        });
-    } catch (e) {
-        alert(e.message);
-    }
+            isLiked: false,
+        }))
+        renderComments()
+    })
 }
 
-
 button.addEventListener('click', async () => {
-    input.classList.remove('error');
-    textarea.classList.remove('error');
+    input.classList.remove('error')
+    textarea.classList.remove('error')
 
-    const name = input.value.trim();
-    const text = textarea.value.trim();
-    const quote = textarea.dataset.quote || '';
-    const quoteAuthor = textarea.dataset.quoteAuthor || '';
+    const name = input.value.trim()
+    const text = textarea.value.trim()
+    const quote = textarea.dataset.quote || ''
+    const quoteAuthor = textarea.dataset.quoteAuthor || ''
 
     if (!name || !text) {
-        alert('Заполни все поля');
-        input.classList.add('error');
-        textarea.classList.add('error');
-        return;
+        alert('Заполни все поля')
+        input.classList.add('error')
+        textarea.classList.add('error')
+        return
     }
 
     try {
-        await postComment({ name, text });
-        input.value = '';
-        textarea.value = '';
-        textarea.quote = '';
-        textarea.quoteAuthor = '';
+        await postComment({ name, text })
 
-        let oldQuote = document.querySelector('.js-quote-block');
-        if (oldQuote) oldQuote.remove();
+        comments.push({
+            name,
+            text,
+            quote,
+            quoteAuthor,
+            date: new Date().toLocaleString(),
+            likesCount: 0,
+            isLiked: false,
+        })
 
-        await renderAll();
+        input.value = ''
+        textarea.value = ''
+        textarea.dataset.quote = ''
+        textarea.dataset.quoteAuthor = ''
+        const oldQuote = document.querySelector('.js-quote-block')
+        if (oldQuote) oldQuote.remove()
+
+        renderComments()
     } catch (e) {
-        alert(e.message);
+        alert('Ошибка при отправке: ' + e.message)
     }
-});
+})
 
-renderAll();
+loadComments()
