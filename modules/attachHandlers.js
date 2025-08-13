@@ -48,7 +48,6 @@ export function attachAddCommentHandler() {
         const quote = textarea.dataset.quote || '';
         const quoteAuthor = textarea.dataset.quoteAuthor || '';
 
-        // Валидация длины >= 3
         if (name.length < 3 || text.length < 3) {
             alert('Имя и комментарий должны быть не короче 3 символов');
             if (name.length < 3) input.classList.add('error');
