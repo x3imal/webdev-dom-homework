@@ -144,3 +144,18 @@ body {
 [hidden] {
     display: none !important;
 }
+
+.logout-button {
+    margin-top: 24px;
+    font-size: 18px;
+    padding: 8px 18px;
+    background-color: #ccc;
+    border: none;
+    border-radius: 18px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.logout-button:hover {
+    background: #666;
+}
