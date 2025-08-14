@@ -3,6 +3,8 @@ import { renderComments } from './renderComments.js'
 import { showQuoteBlock } from './showQuoteBlock.js'
 import {postComment} from "./commentsApi.js";
 
+const FORCE_500 = false; //сделаем для теста
+
 export function attachLikeListeners() {
     document.querySelectorAll('.like-button').forEach((btn) => {
         btn.onclick = () => {
@@ -46,10 +48,10 @@ export function attachAddCommentHandler() {
         const quote = textarea.dataset.quote || '';
         const quoteAuthor = textarea.dataset.quoteAuthor || '';
 
-        if (!name || !text) {
-            alert('Заполни все поля');
-            input.classList.add('error');
-            textarea.classList.add('error');
+        if (name.length < 3 || text.length < 3) {
+            alert('Имя и комментарий должны быть не короче 3 символов');
+            if (name.length < 3) input.classList.add('error');
+            if (text.length < 3) textarea.classList.add('error');
             return;
         }
 
@@ -59,7 +61,7 @@ export function attachAddCommentHandler() {
 
         let ok = false;
 
-        postComment({ name, text })
+        postComment({ name, text, forceError: FORCE_500 })
             .then(() => {
                 comments.push({
                     name,
@@ -84,7 +86,15 @@ export function attachAddCommentHandler() {
                 renderComments();
             })
             .catch((e) => {
-                alert('Ошибка при отправке: ' + e.message);
+                if (e.code === 'offline') {
+                    alert('Кажется, у вас сломался интернет, попробуйте позже');
+                } else if (e.code === 'server') {
+                    alert('Сервер сломался, попробуй позже');
+                } else if (e.code === 'bad_request') {
+                    alert(e.message || 'Ошибка валидации');
+                } else {
+                    alert('Ошибка при отправке: ' + e.message);
+                }
             })
             .finally(() => {
                 addLoader.hidden = true;

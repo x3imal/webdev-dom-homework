@@ -1,8 +1,8 @@
-import { getComments } from './modules/commentsApi.js'
-import { renderComments } from './modules/renderComments.js'
-import {attachAddCommentHandler} from "./modules/attachHandlers.js";
+import { getComments } from './modules/commentsApi.js';
+import { renderComments } from './modules/renderComments.js';
+import { attachAddCommentHandler } from './modules/attachHandlers.js';
 
-export let comments = []
+export let comments = [];
 
 function loadComments() {
     const list = document.querySelector('.comments');
@@ -23,16 +23,18 @@ function loadComments() {
                 isLiked: false,
             }));
         })
-        .then(() => {
-            renderComments();
-        })
+        .then(() => { renderComments(); })
         .catch((err) => {
+            if (err.code === 'offline') {
+                alert('Кажется, у вас сломался интернет, попробуйте позже');
+            } else if (err.code === 'server') {
+                alert('Сервер сломался, попробуй позже');
+            } else {
+                alert('Не удалось загрузить комментарии');
+            }
             console.error('Ошибка загрузки комментариев:', err);
-            alert('Не удалось загрузить комментарии');
         })
-        .finally(() => {
-            listLoader.hidden = true;
-        });
+        .finally(() => { listLoader.hidden = true; });
 }
 
 attachAddCommentHandler();
