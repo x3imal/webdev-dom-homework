@@ -1,6 +1,6 @@
-import { comments } from '../index.js'
-import { renderComments } from './renderComments.js'
-import { showQuoteBlock } from './showQuoteBlock.js'
+import {comments, auth, renderCommentsPage} from '../index.js'
+import {renderComments} from './renderComments.js'
+import {showQuoteBlock} from './showQuoteBlock.js'
 import {postComment} from "./commentsApi.js";
 
 const FORCE_500 = false; //сделаем для теста
@@ -33,25 +33,26 @@ export function attachQuoteListeners() {
 }
 
 export function attachAddCommentHandler() {
-    const input = document.querySelector('.add-form-name');
     const textarea = document.querySelector('.add-form-text');
     const button = document.querySelector('.add-form-button');
     const addForm = document.querySelector('.add-form');
     const addLoader = document.querySelector('.add-loader');
+    if (!button) return;
 
     button.addEventListener('click', () => {
-        input.classList.remove('error');
+        if (!auth.token) {
+            renderCommentsPage({forceLoginHint: true});
+            return;
+        }
+
         textarea.classList.remove('error');
+        const text = (textarea?.value || '').trim();
+        const quote = textarea?.dataset.quote || '';
+        const quoteAuthor = textarea?.dataset.quoteAuthor || '';
 
-        const name = input.value.trim();
-        const text = textarea.value.trim();
-        const quote = textarea.dataset.quote || '';
-        const quoteAuthor = textarea.dataset.quoteAuthor || '';
-
-        if (name.length < 3 || text.length < 3) {
-            alert('Имя и комментарий должны быть не короче 3 символов');
-            if (name.length < 3) input.classList.add('error');
-            if (text.length < 3) textarea.classList.add('error');
+        if (text.length < 3) {
+            alert('Комментарий должен быть не короче 3 символов');
+            textarea.classList.add('error');
             return;
         }
 
@@ -61,10 +62,10 @@ export function attachAddCommentHandler() {
 
         let ok = false;
 
-        postComment({ name, text, forceError: FORCE_500 })
+        postComment({text, token: auth.token, forceError: FORCE_500})
             .then(() => {
                 comments.push({
-                    name,
+                    name: auth.name,
                     text,
                     quote,
                     quoteAuthor,
@@ -76,25 +77,26 @@ export function attachAddCommentHandler() {
             })
             .then(() => {
                 if (ok) {
-                    input.value = '';
-                    textarea.value = '';
-                    textarea.dataset.quote = '';
-                    textarea.dataset.quoteAuthor = '';
-                    const oldQuote = document.querySelector('.js-quote-block');
-                    if (oldQuote) oldQuote.remove();
+                    if (textarea) {
+                        textarea.value = '';
+                        textarea.dataset.quote = '';
+                        textarea.dataset.quoteAuthor = '';
+                        document.querySelector('.js-quote-block')?.remove();
+                    }
                 }
                 renderComments();
+                addLoader.hidden = true;
             })
             .catch((e) => {
-                if (e.code === 'offline') {
-                    alert('Кажется, у вас сломался интернет, попробуйте позже');
-                } else if (e.code === 'server') {
-                    alert('Сервер сломался, попробуй позже');
-                } else if (e.code === 'bad_request') {
-                    alert(e.message || 'Ошибка валидации');
-                } else {
-                    alert('Ошибка при отправке: ' + e.message);
-                }
+                if (e.code === 'offline') alert('Кажется, у вас сломался интернет, попробуйте позже');
+                else if (e.code === 'server') alert('Сервер сломался, попробуй позже');
+                else if (e.code === 'unauthorized') {
+                    alert('Сессия истекла. Войдите снова.');
+                    auth.token = null;
+                    auth.name = '';
+                    renderCommentsPage({forceLoginHint: true});
+                } else if (e.code === 'bad_request') alert(e.message || 'Ошибка валидации');
+                else alert('Ошибка при отправке: ' + e.message);
             })
             .finally(() => {
                 addLoader.hidden = true;
